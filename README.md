@@ -1,2 +1,0 @@
-# TOS
-Train Operating System
