@@ -7,7 +7,7 @@ PORT train_port;
 #define COMMAND_INPUT_MAX_SIZE 5
 #define COMMAND_SLEEP 10
 #define CONFIG_4_SLEEP 230
-#define CHECK_ZAMBONI_SLEEP 50
+#define CHECK_ZAMBONI_SLEEP 30
 
 BOOL zamboni_appear = FALSE;
 BOOL zamboni_go_left = TRUE;
@@ -97,7 +97,7 @@ void keep_probing_if_not_on(char *contact_number) {
 /****************End of helper functions**************/
 
 /****************Configuration functions**************/
-void zamboni_config_1() {
+void zamboni_config_1_or_2() {
 	wprintf(train_wnd, "Set route for Zamboni.\n");
 	set_switch("1", "R");
 	set_switch("8", "G");
@@ -138,7 +138,7 @@ void config_1_or_2() {
 
 void config_1Z() {
 	wprintf(train_wnd, "Running config 1 with Zamboni\n");
-	keep_probing_if_not_on("13");
+	keep_probing_if_not_on("12");
 	set_switch("6", "R");
 	set_switch("5", "R");
 	set_switch("4", "R");
@@ -159,7 +159,7 @@ void config_1Z() {
 
 void config_2Z() {
 	wprintf(train_wnd, "Running config 2 with Zamboni\n");
-	keep_probing_if_not_on("13");
+	keep_probing_if_not_on("12");
 	set_switch("6", "R");
 	set_switch("5", "R");
 	set_switch("4", "R");
@@ -259,20 +259,23 @@ void check_config() {
 	//if it's on 5 ---> configuration 3 or 4
 	if(probe("8")) {
 		if(!zamboni_appear) {
+			wprintf(train_wnd, "Configuration 1 OR 2 without Zamboni...\n");
 			config_1_or_2();
 		}
 		else if(zamboni_go_left) {
+			wprintf(train_wnd, "Configuration 1 with Zamboni...\n");
+			zamboni_config_1_or_2();
 			config_1Z();
 		}
 		else {
+			wprintf(train_wnd, "Configuration 2 with Zamboni...\n");
+			zamboni_config_1_or_2();
 			config_2Z();
 		}
 	}
-	else if(probe("5")) {
-		wprintf(train_wnd, "Trying to detect config 3 or 4.\n");	
+	else if(probe("5")) {	
 		//if wagon is on 11 ---> configuration 3
 		if(probe("11")){
-			wprintf(train_wnd, "Trying to detect config 3.\n");	
 			if(!zamboni_appear) {
 				config_3();
 			}
