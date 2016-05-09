@@ -6,11 +6,16 @@ WINDOW* shell_window = &shell_window_def;
 static WINDOW pacman_window_def = {61, 9, 61, 16, 0, 0, 0xDC};
 WINDOW* pacman_window = &pacman_window_def;
 
+static WINDOW train_window_def = {0, 0, 50, 8, 0, 0, ' '};
+WINDOW* train_window = &train_window_def;
+
 /* Command buffer */
 #define MAX_COMMAND 100
 char curr_command[MAX_COMMAND];
 //variable to track the size of current command buffer
 int command_size = 0;
+
+extern BOOL train_running;
 
 /***************shell functions******************/
 void func_help() {
@@ -48,7 +53,11 @@ void func_pacman() {
 
 /* function that starts train application*/
 void func_train() {
-	wprintf(shell_window, "train command which starts the train application will be supported soon!\n");
+	if (!train_running) {
+		init_train(train_window);
+	} else {
+        wprintf(shell_window, "Sorry, the train process is running.\n");
+	}
 }
 
 /* function that starts the train*/
