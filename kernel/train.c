@@ -99,7 +99,7 @@ void keep_probing_if_not_on(char *contact_number) {
 /****************Configuration functions**************/
 void zamboni_config_1() {
 	wprintf(train_wnd, "Set route for Zamboni.\n");
-	set_switch("1", "G");
+	set_switch("1", "R");
 	set_switch("8", "G");
 	set_switch("5", "G");
 	set_switch("4", "G");
@@ -136,9 +136,46 @@ void config_1_or_2() {
 	wprintf(train_wnd, "Train successfully bring wagon back to HOME in configuration 1 or 2.\n");
 }
 
-void config_1Z() {}
+void config_1Z() {
+	wprintf(train_wnd, "Running config 1 with Zamboni\n");
+	keep_probing_if_not_on("13");
+	set_switch("6", "R");
+	set_switch("5", "R");
+	set_switch("4", "R");
+	set_switch("3", "G");
+	execute_train_command("L20S5");
 
-void config_2Z() {}
+	keep_probing_if_not_on("1");
+
+	execute_train_command("L20S0");
+	execute_train_command("L20D");
+	execute_train_command("L20S5");
+
+	keep_probing_if_not_on("8");
+	execute_train_command("L20S0");
+	wprintf(train_wnd, "Train successfully bring wagon back to HOME in configuration 1 with Zamboni.\n");
+
+}
+
+void config_2Z() {
+	wprintf(train_wnd, "Running config 2 with Zamboni\n");
+	keep_probing_if_not_on("13");
+	set_switch("6", "R");
+	set_switch("5", "R");
+	set_switch("4", "R");
+	set_switch("3", "G");
+	execute_train_command("L20S5");
+
+	keep_probing_if_not_on("1");
+
+	execute_train_command("L20S0");
+	execute_train_command("L20D");
+	execute_train_command("L20S5");
+
+	keep_probing_if_not_on("8");
+	execute_train_command("L20S0");
+	wprintf(train_wnd, "Train successfully bring wagon back to HOME in configuration 2 with Zamboni.\n");
+}
 
 void config_3() {
 	wprintf(train_wnd, "Running config 3 without Zamboni\n");
