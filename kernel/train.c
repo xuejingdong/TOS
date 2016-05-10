@@ -7,7 +7,8 @@ PORT train_port;
 #define COMMAND_INPUT_MAX_SIZE 5
 #define COMMAND_SLEEP 10
 #define CONFIG_3_SLEEP 80
-#define CONFIG_4_SLEEP 230
+#define CONFIG_4_SLEEP 210
+#define CONFIG_4Z_SLEEP 150
 #define CHECK_ZAMBONI_SLEEP 30
 
 BOOL zamboni_appear = FALSE;
@@ -113,7 +114,6 @@ void zamboni_route_1() {
 		keep_probing_if_not_on("14");
 
 	set_switch("9", "R");
-	wprintf(train_wnd, "set 1 to r in zamboni route\n");
 	set_switch("1", "R");
 	set_switch("8", "R");
 }
@@ -130,7 +130,7 @@ void zamboni_route_2() {
 }
 
 void config_1_or_2() {
-	wprintf(train_wnd, "Running config 1 or 2 without Zamboni\n");
+	wprintf(train_wnd, "Running config either 1 or 2 without Zamboni\n");
 	set_switch("6", "R");
 	set_switch("5", "R");
 	set_switch("4", "R");
@@ -145,7 +145,7 @@ void config_1_or_2() {
 
 	keep_probing_if_not_on("8");
 	execute_train_command("L20S0");
-	wprintf(train_wnd, "Train successfully bring wagon back to HOME in configuration 1 or 2.\n");
+	wprintf(train_wnd, "Train brings wagon back to HOME in either config 1 or 2.\n");
 }
 
 void config_1Z() {
@@ -165,7 +165,7 @@ void config_1Z() {
 
 	keep_probing_if_not_on("8");
 	execute_train_command("L20S0");
-	wprintf(train_wnd, "Train successfully bring wagon back to HOME in configuration 1 with Zamboni.\n");
+	wprintf(train_wnd, "Train brings wagon back to HOME in config 1 with Zamboni.\n");
 
 }
 
@@ -186,7 +186,7 @@ void config_2Z() {
 
 	keep_probing_if_not_on("8");
 	execute_train_command("L20S0");
-	wprintf(train_wnd, "Train successfully bring wagon back to HOME in configuration 2 with Zamboni.\n");
+	wprintf(train_wnd, "Train brings wagon back to HOME in config 2 with Zamboni.\n");
 }
 
 void config_3() {
@@ -216,7 +216,7 @@ void config_3() {
 
 	keep_probing_if_not_on("5");
 	execute_train_command("L20S0");
-	wprintf(train_wnd, "Train successfully bring wagon back to HOME in configuration 3.\n");
+	wprintf(train_wnd, "Train brings wagon back to HOME in config 3.\n");
 }
 
 void config_3Z() {
@@ -254,7 +254,7 @@ void config_3Z() {
 
 	set_switch("4", "G");
 
-	wprintf(train_wnd, "Train successfully bring wagon back to HOME in configuration 3 with Zamboni.\n");
+	wprintf(train_wnd, "Train brings wagon back to HOME in config 3 with Zamboni.\n");
 }
 
 void config_4() {
@@ -275,15 +275,52 @@ void config_4() {
 
 	keep_probing_if_not_on("5");
 	execute_train_command("L20S0");
-	wprintf(train_wnd, "Train successfully bring wagon back to HOME in configuration 4.\n");
+	wprintf(train_wnd, "Train brings wagon back to HOME in config 4.\n");
 
 }
 
-void config_4Z() {}
+void config_4Z() {
+	wprintf(train_wnd, "Running config 4 wit Zamboni\n");
+	set_switch("3", "R");
+	execute_train_command("L20S5");
+
+	keep_probing_if_not_on("6");
+	execute_train_command("L20S0");
+	execute_train_command("L20D");
+	execute_train_command("L20S5");
+
+	set_switch("4", "G");
+	set_switch("1", "G");
+	set_switch("8", "G");
+
+	keep_probing_if_not_on("10");
+	execute_train_command("L20S0");
+	execute_train_command("L20D");
+	execute_train_command("L20S5");
+	set_switch("9", "G");
+
+	keep_probing_if_not_on("14");
+	sleep(CONFIG_4Z_SLEEP);
+	execute_train_command("L20S0");
+	execute_train_command("L20D");
+	execute_train_command("L20S5");
+
+	keep_probing_if_not_on("4");
+
+	set_switch("3", "R");
+	set_switch("4", "R");
+
+	keep_probing_if_not_on("5");
+	execute_train_command("L20S0");
+	set_switch("4", "G");
+
+	wprintf(train_wnd, "Train brings wagon back to HOME in config 4 with Zamboni.\n");
+
+}
 
 //determine the configuration according to the current contacts staus
-void check_config() {
-	wprintf(train_wnd, "Checking the contact board and deciding Configuration...\n");
+void run_according_to_config() {
+	wprintf(train_wnd, "Checking the contact board and deciding Config...\n");
 
 	sleep(CHECK_ZAMBONI_SLEEP);
 	//probe contact 3 and 6 to determain if zamboni appears
@@ -307,16 +344,13 @@ void check_config() {
 	//if it's on 5 ---> configuration 3 or 4
 	if(probe("8")) {
 		if(!zamboni_appear) {
-			wprintf(train_wnd, "Configuration 1 OR 2 without Zamboni...\n");
 			config_1_or_2();
 		}
 		else if(zamboni_go_left) {
-			wprintf(train_wnd, "Configuration 1 with Zamboni...\n");
 			zamboni_route_1();
 			config_1Z();
 		}
 		else {
-			wprintf(train_wnd, "Configuration 2 with Zamboni...\n");
 			zamboni_route_1();
 			config_2Z();
 		}
@@ -338,7 +372,7 @@ void check_config() {
 				config_4();
 			}
 			else if(zamboni_appear && !zamboni_go_left){
-				zamboni_route_2();
+				zamboni_route_1();
 				config_4Z();
 			}
 		}
@@ -362,7 +396,7 @@ void train_process(PROCESS self, PARAM param)
 
 	wprintf(train_wnd, "Train process initialized.\n");	
 
-	check_config();
+	run_according_to_config();
 
 	train_running = TRUE;
 
