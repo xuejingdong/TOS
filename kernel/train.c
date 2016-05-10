@@ -5,11 +5,12 @@ PORT train_port;
 
 #define COMMAND_OUTPUT_MAX_SIZE 10
 #define COMMAND_INPUT_MAX_SIZE 5
+
 #define COMMAND_SLEEP 10
 #define CONFIG_3_SLEEP 80
 #define CONFIG_4_SLEEP 210
-#define CONFIG_4Z_SLEEP 150
-#define CHECK_ZAMBONI_SLEEP 30
+#define CONFIG_4Z_SLEEP 140
+#define CHECK_ZAMBONI_SLEEP 60
 
 BOOL zamboni_appear = FALSE;
 BOOL zamboni_go_left = TRUE;
@@ -294,16 +295,21 @@ void config_4Z() {
 	set_switch("8", "G");
 
 	keep_probing_if_not_on("10");
+	set_switch("9", "G");
+	sleep(50);
 	execute_train_command("L20S0");
 	execute_train_command("L20D");
 	execute_train_command("L20S5");
-	set_switch("9", "G");
+	
 
 	keep_probing_if_not_on("14");
 	sleep(CONFIG_4Z_SLEEP);
 	execute_train_command("L20S0");
 	execute_train_command("L20D");
 	execute_train_command("L20S5");
+
+	keep_probing_if_not_on("14");
+	set_switch("9", "R");
 
 	keep_probing_if_not_on("4");
 
@@ -398,7 +404,7 @@ void train_process(PROCESS self, PARAM param)
 
 	run_according_to_config();
 
-	train_running = TRUE;
+	train_running = FALSE;
 
 	remove_ready_queue(active_proc);
     resign();
