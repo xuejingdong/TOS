@@ -9,8 +9,8 @@ PORT train_port;
 #define COMMAND_SLEEP 10
 #define CONFIG_3_SLEEP 80
 #define CONFIG_4_SLEEP 210
-#define CONFIG_4Z_SLEEP 140
-#define CHECK_ZAMBONI_SLEEP 60
+#define CONFIG_4Z_SLEEP 160
+#define CHECK_ZAMBONI_SLEEP 20
 
 BOOL zamboni_appear = FALSE;
 BOOL zamboni_go_left = TRUE;
@@ -103,11 +103,6 @@ void keep_probing_if_not_on(char *contact_number) {
 void zamboni_route_1() {
 	wprintf(train_wnd, "Set route for Zamboni.\n");
 	set_switch("1", "R");
-	set_switch("8", "G");
-	set_switch("5", "G");
-	set_switch("4", "G");
-	set_switch("7", "R");
-	set_switch("2", "R");
 
 	if(zamboni_go_left)
 		keep_probing_if_not_on("13");
@@ -202,15 +197,14 @@ void config_3() {
 	execute_train_command("L20D");
 	execute_train_command("L20S5");
 
-	set_switch("7","R");
-	set_switch("9","R");
-	set_switch("1","G");
-
-	keep_probing_if_not_on("6");
-
+	keep_probing_if_not_on("13");
+	
 	execute_train_command("L20S0");
 	execute_train_command("L20D");
 	execute_train_command("L20S5");
+
+	set_switch("5","G");
+	set_switch("8","G");
 
 	set_switch("4","R");
 	set_switch("3","R");
@@ -282,6 +276,13 @@ void config_4() {
 
 void config_4Z() {
 	wprintf(train_wnd, "Running config 4 wit Zamboni\n");
+	keep_probing_if_not_on("10");
+	keep_probing_if_not_on("14");
+
+	set_switch("9", "R");
+	set_switch("1", "R");
+	set_switch("8", "R");
+
 	set_switch("3", "R");
 	execute_train_command("L20S5");
 
@@ -296,7 +297,7 @@ void config_4Z() {
 
 	keep_probing_if_not_on("10");
 	set_switch("9", "G");
-	sleep(50);
+	sleep(30);
 	execute_train_command("L20S0");
 	execute_train_command("L20D");
 	execute_train_command("L20S5");
@@ -328,6 +329,8 @@ void config_4Z() {
 void run_according_to_config() {
 	wprintf(train_wnd, "Checking the contact board and deciding Config...\n");
 
+	zamboni_route_2();
+
 	sleep(CHECK_ZAMBONI_SLEEP);
 	//probe contact 3 and 6 to determain if zamboni appears
 	//if it's on 3 ---> zamboni goes to right first
@@ -337,7 +340,7 @@ void run_according_to_config() {
 		zamboni_go_left = FALSE;
 	} 
 	else {
-		if(probe("6")) {
+		if(probe("6") || probe("7")) {
 			zamboni_appear = TRUE;
 			zamboni_go_left = TRUE;
 		} else {
@@ -368,7 +371,6 @@ void run_according_to_config() {
 				config_3();
 			}
 			else if(zamboni_appear && zamboni_go_left){
-				zamboni_route_2();
 				config_3Z();
 			}
 		}
@@ -378,7 +380,6 @@ void run_according_to_config() {
 				config_4();
 			}
 			else if(zamboni_appear && !zamboni_go_left){
-				zamboni_route_1();
 				config_4Z();
 			}
 		}
