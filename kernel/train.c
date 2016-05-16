@@ -9,7 +9,7 @@ PORT train_port;
 #define COMMAND_SLEEP 10
 #define CONFIG_3_SLEEP 80
 #define CONFIG_4_SLEEP 210
-#define CONFIG_4Z_SLEEP 160
+#define CONFIG_4Z_SLEEP 140
 #define CHECK_ZAMBONI_SLEEP 20
 
 BOOL zamboni_appear = FALSE;
@@ -198,7 +198,7 @@ void config_3() {
 	execute_train_command("L20S5");
 
 	keep_probing_if_not_on("13");
-	
+
 	execute_train_command("L20S0");
 	execute_train_command("L20D");
 	execute_train_command("L20S5");
@@ -216,6 +216,7 @@ void config_3() {
 
 void config_3Z() {
 	wprintf(train_wnd, "Running config 3 with Zamboni\n");
+	keep_probing_if_not_on("10");
 
 	set_switch("3", "R");
 	set_switch("4", "R");
@@ -276,7 +277,6 @@ void config_4() {
 
 void config_4Z() {
 	wprintf(train_wnd, "Running config 4 wit Zamboni\n");
-	keep_probing_if_not_on("10");
 	keep_probing_if_not_on("14");
 
 	set_switch("9", "R");
@@ -297,7 +297,6 @@ void config_4Z() {
 
 	keep_probing_if_not_on("10");
 	set_switch("9", "G");
-	sleep(30);
 	execute_train_command("L20S0");
 	execute_train_command("L20D");
 	execute_train_command("L20S5");
@@ -331,20 +330,29 @@ void run_according_to_config() {
 
 	zamboni_route_2();
 
-	sleep(CHECK_ZAMBONI_SLEEP);
-	//probe contact 3 and 6 to determain if zamboni appears
-	//if it's on 3 ---> zamboni goes to right first
-	//if it's on 6 ---> zamboni goes to left first  
-	if(probe("3")) {
-		zamboni_appear = TRUE;
-		zamboni_go_left = FALSE;
-	} 
-	else {
-		if(probe("6") || probe("7")) {
+	//probe contact 13 and 6 to determain if zamboni appears
+	//if it's on 6 ---> zamboni goes to right first
+	//if it's on 13 ---> zamboni goes to left first  
+	int i;
+	while(i++ < 30) {
+		if(probe("7")) {
 			zamboni_appear = TRUE;
-			zamboni_go_left = TRUE;
-		} else {
-			zamboni_appear = FALSE;
+			break;
+		}
+		sleep(10);
+	}	
+
+	if(zamboni_appear) {
+		while(42) {
+			if(probe("13")) {
+				zamboni_go_left = TRUE;
+				break;
+			}
+
+			if(probe("6")) {
+				zamboni_go_left = FALSE;
+				break;
+			}
 		}
 	}
 
@@ -406,6 +414,7 @@ void train_process(PROCESS self, PARAM param)
 	run_according_to_config();
 
 	train_running = FALSE;
+	zamboni_appear = FALSE;
 
 	remove_ready_queue(active_proc);
     resign();
