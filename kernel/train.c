@@ -8,8 +8,8 @@ PORT train_port;
 
 #define COMMAND_SLEEP 10
 #define CONFIG_3_SLEEP 80
-#define CONFIG_4_SLEEP 210
-#define CONFIG_4Z_SLEEP 140
+#define CONFIG_4_SLEEP 160
+#define CONFIG_4Z_SLEEP 160
 #define CHECK_ZAMBONI_SLEEP 20
 
 BOOL zamboni_appear = FALSE;
@@ -295,7 +295,8 @@ void config_4Z() {
 	set_switch("1", "G");
 	set_switch("8", "G");
 
-	keep_probing_if_not_on("10");
+	keep_probing_if_not_on("13");
+	keep_probing_if_not_on("14");
 	set_switch("9", "G");
 	execute_train_command("L20S0");
 	execute_train_command("L20D");
@@ -333,7 +334,7 @@ void run_according_to_config() {
 	//probe contact 13 and 6 to determain if zamboni appears
 	//if it's on 6 ---> zamboni goes to right first
 	//if it's on 13 ---> zamboni goes to left first  
-	int i;
+	int i = 0;
 	while(i++ < 30) {
 		if(probe("7")) {
 			zamboni_appear = TRUE;
@@ -424,6 +425,6 @@ void train_process(PROCESS self, PARAM param)
 void init_train(WINDOW* wnd)
 {
 	train_wnd = wnd;	
-	train_port = create_process(train_process, 3, 0, "Train Process");
+	train_port = create_process(train_process, 5, 0, "Train Process");
 	return;
 }

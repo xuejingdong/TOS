@@ -169,7 +169,7 @@ void execute_command() {
 
 //shell process
 void shell_process(PROCESS self, PARAM param) {
-	//init_train(train_window);
+	init_train(train_window);
     wprintf(shell_window, "$ ");
     Keyb_Message message;
     char cur_char;
